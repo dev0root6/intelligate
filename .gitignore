@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment / secrets
+.env
+.env.*
+*.local
+
+# Application data (SQLite + user uploads)
+database/
+faces/
+static/uploads/
+
+# Flask / logs
+instance/
+.webassets-cache
+*.log
+logs/
+
+# Runtime
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Redundant project logo (kept at static/img/intelligate-logo.png)
+/intelligate-logo.png
+
+# Stray npm artifacts (no package.json in this project)
+package-lock.json

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Booking Confirmed - IntelliGate AFC{% endblock %}
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="text-center mb-4">
+        <div class="confirmation-icon">
+          <i class="ph-fill ph-check-circle"></i>
+        </div>
+        <h2 class="fw-bold mt-3 text-green">Booking Confirmed!</h2>
+        <p class="text-muted">Your metro ticket has been booked successfully</p>
+      </div>
+
+      <div class="card-metro p-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4 pb-3" style="border-bottom:1px solid var(--border);">
+          <div>
+            <div class="text-muted small">Booking ID</div>
+            <h4 class="fw-bold text-brand mb-0">{{ booking.booking_id }}</h4>
+          </div>
+          <span class="status-badge status-active">Active</span>
+        </div>
+
+        <h6 class="fw-bold mb-3"><i class="ph ph-map-pin text-brand"></i> Travel Details</h6>
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <div class="text-muted small">Source</div>
+            <div class="fw-semibold">{{ booking.source }}</div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted small">Destination</div>
+            <div class="fw-semibold">{{ booking.destination }}</div>
+          </div>
+          <div class="col-md-2">
+            <div class="text-muted small">Date</div>
+            <div class="fw-semibold">{{ booking.travel_date }}</div>
+          </div>
+          <div class="col-md-2">
+            <div class="text-muted small">Passengers</div>
+            <div class="fw-semibold">{{ booking.passenger_count }}</div>
+          </div>
+        </div>
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <div class="text-muted small">Total Fare</div>
+            <div class="fw-semibold text-green" style="font-size:1.1rem;">
+              {% if booking.fare %}&#8377;{{ booking.fare|int }}{% else %}<span class="text-muted">N/A</span>{% endif %}
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="text-muted small">Fare Breakdown</div>
+            <div class="fw-semibold small text-muted">
+              {% if booking.fare %}
+                &#8377;{{ (booking.fare / booking.passenger_count)|int }} per passenger &times; {{ booking.passenger_count }} passenger(s)
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <h6 class="fw-bold mb-3"><i class="ph ph-map-trifold text-brand"></i> Route Guide</h6>
+        {% if route_guide %}
+        <div class="route-guide mb-4">
+          <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
+            <span class="fw-semibold">{{ route_guide.source }}</span>
+            <i class="ph ph-arrow-right text-muted"></i>
+            <span class="fw-semibold">{{ route_guide.destination }}</span>
+            <span class="badge text-bg-light fw-semibold ms-auto">{{ route_guide.total_stops }} stops</span>
+          </div>
+
+          {% for leg in route_guide.legs %}
+            <div class="route-leg">
+              <div class="leg-head d-flex align-items-center gap-2">
+                <span class="line-badge" style="background:{{ {
+                  'Purple': '#7b3fa0',
+                  'Green':  '#00843d',
+                  'Yellow': '#f2b705',
+                }.get(leg.line, 'var(--brand)') }};color:#fff;">
+                  {{ leg.line }} Line
+                </span>
+                <span class="small text-muted">{{ leg.station_count }} stations &middot; {{ leg.stops }} stop{{ 's' if leg.stops != 1 }}</span>
+              </div>
+              <div class="leg-route small">
+                <span class="fw-semibold">{{ leg.from }}</span>
+                <span class="track">
+                  {% for i in range(leg.stops) %}<span class="stop-dot"></span>{% endfor %}
+                </span>
+                <span class="fw-semibold">{{ leg.to }}</span>
+              </div>
+            </div>
+
+            {% if not loop.last %}
+            <div class="interchange d-flex align-items-center gap-2">
+              <i class="ph ph-arrows-left-right text-brand"></i>
+              <span class="small">
+                <strong>Change here:</strong> {{ leg.to }} &mdash;
+                <span class="fw-semibold" style="color:{{ {
+                  'Purple': '#7b3fa0', 'Green': '#00843d', 'Yellow': '#b8860b',
+                }.get(leg.line, 'var(--text)') }};">{{ leg.line }}</span>
+                &rarr;
+                <span class="fw-semibold" style="color:{{ {
+                  'Purple': '#7b3fa0', 'Green': '#00843d', 'Yellow': '#b8860b',
+                }.get(route_guide.legs[loop.index].line, 'var(--text)') }};">{{ route_guide.legs[loop.index].line }}</span>
+              </span>
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-warning small py-2">Route guide unavailable for this journey.</div>
+        {% endif %}
+
+        <h6 class="fw-bold mb-3"><i class="ph ph-users text-brand"></i> Passenger Details</h6>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle">
+            <thead class="table-light">
+              <tr><th>#</th><th>Name</th><th>Age</th><th>Gender</th><th>Face</th><th>Ticket Status</th></tr>
+            </thead>
+            <tbody>
+              {% for p in passengers %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ p.name }}</td>
+                <td>{{ p.age }}</td>
+                <td>{{ p.gender }}</td>
+                <td>
+                  {% if p.face_image_path %}
+                    <img src="{{ url_for('serve_face', filename=p.face_image_path) }}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;">
+                  {% else %}
+                    <span class="text-muted">No photo</span>
+                  {% endif %}
+                </td>
+                <td><span class="status-badge status-{{ p.ticket_status|lower }}">{{ p.ticket_status }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="text-center mt-4 d-flex gap-2 justify-content-center flex-wrap">
+        <a href="{{ url_for('my_bookings') }}" class="btn-brand"><i class="ph ph-list-dashes"></i> View My Bookings</a>
+        <a href="{{ url_for('dashboard') }}" class="btn-brand-outline"><i class="ph ph-gauge"></i> Dashboard</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

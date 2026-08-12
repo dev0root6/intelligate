@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Register - IntelliGate AFC{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <div class="auth-header">
+    <div class="auth-icon"><i class="ph ph-user-plus"></i></div>
+    <h3>Create Account</h3>
+    <p>Join IntelliGate to book and travel with facial recognition</p>
+  </div>
+  <div class="auth-body">
+    <form method="POST" action="{{ url_for('register') }}">
+      <div class="mb-3">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-control" name="full_name" required autofocus placeholder="Your full name">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" name="email" required placeholder="you@example.com">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Phone Number</label>
+        <input type="tel" class="form-control" name="phone" required placeholder="Your phone number">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" name="password" required placeholder="At least 6 characters">
+      </div>
+      <div class="mb-4">
+        <label class="form-label">Confirm Password</label>
+        <input type="password" class="form-control" name="confirm_password" required placeholder="Re-enter password">
+      </div>
+      <button type="submit" class="btn-brand w-100"><i class="ph ph-user-check"></i> Create Account</button>
+    </form>
+    <p class="text-center mt-3 mb-0 text-muted small">Already have an account? <a href="{{ url_for('login') }}" class="fw-semibold">Sign in</a></p>
+  </div>
+</div>
+{% endblock %}

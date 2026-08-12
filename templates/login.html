@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Login - IntelliGate AFC{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <div class="auth-header">
+    <div class="auth-icon"><i class="ph ph-sign-in"></i></div>
+    <h3>Welcome Back</h3>
+    <p>Sign in to your metro account</p>
+  </div>
+  <div class="auth-body">
+    <form method="POST" action="{{ url_for('login') }}">
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" name="email" required autofocus placeholder="you@example.com">
+      </div>
+      <div class="mb-4">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" name="password" required placeholder="Your password">
+      </div>
+      <button type="submit" class="btn-brand w-100"><i class="ph ph-lock-key"></i> Sign In</button>
+    </form>
+    <p class="text-center mt-3 mb-0 text-muted small">New here? <a href="{{ url_for('register') }}" class="fw-semibold">Create an account</a></p>
+  </div>
+</div>
+{% endblock %}

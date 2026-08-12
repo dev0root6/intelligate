@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Profile - IntelliGate AFC{% endblock %}
+{% block content %}
+<div class="container my-4">
+  <div class="section-divider"></div>
+  <h2 class="section-title"><i class="ph ph-user-circle"></i> My Profile</h2>
+  <p class="section-subtitle">Manage your account details</p>
+
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="card-metro text-center p-4">
+        <div class="profile-avatar mx-auto">
+          <i class="ph-fill ph-user"></i>
+        </div>
+        <h4 class="fw-bold mt-3 mb-1">{{ user.full_name }}</h4>
+        <p class="text-muted mb-3 small">{{ user.email }}</p>
+        <div class="row text-center">
+          <div class="col-4">
+            <div class="fw-bold" style="font-size:1.3rem;">{{ stats.total_bookings }}</div>
+            <div class="small text-muted">Bookings</div>
+          </div>
+          <div class="col-4">
+            <div class="fw-bold" style="font-size:1.3rem;">{{ stats.active_bookings }}</div>
+            <div class="small text-muted">Active</div>
+          </div>
+          <div class="col-4">
+            <div class="fw-bold" style="font-size:1.3rem;">{{ stats.total_passengers }}</div>
+            <div class="small text-muted">Passengers</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-8">
+      <div class="card-metro p-4">
+        <h5 class="fw-bold mb-3"><i class="ph ph-pencil-simple text-brand"></i> Edit Details</h5>
+        <form method="POST" action="{{ url_for('profile') }}">
+          <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input type="text" class="form-control" name="full_name" value="{{ user.full_name }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" value="{{ user.email }}" disabled>
+            <div class="form-text">Email cannot be changed.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" class="form-control" name="phone" value="{{ user.phone }}" required>
+          </div>
+          <button type="submit" class="btn-brand"><i class="ph ph-floppy-disk"></i> Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

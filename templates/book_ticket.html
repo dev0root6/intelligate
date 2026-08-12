@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Book Ticket - IntelliGate AFC{% endblock %}
+{% block content %}
+<div class="container my-4">
+  <div class="section-divider"></div>
+  <h2 class="section-title"><i class="ph ph-ticket"></i> Book a Ticket</h2>
+  <p class="section-subtitle">Enter travel details and capture each passenger's face</p>
+
+  <form id="bookingForm" method="POST" action="{{ url_for('book_ticket') }}">
+    <div class="card-metro p-4 mb-4">
+      <h5 class="fw-bold mb-3"><i class="ph ph-map-pin text-brand"></i> Travel Details</h5>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Source Station</label>
+          <select class="form-select" name="source" required>
+            <option value="">Select source</option>
+            {% for s in stations %}<option>{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Destination Station</label>
+          <select class="form-select" name="destination" required>
+            <option value="">Select destination</option>
+            {% for s in stations %}<option>{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Travel Date</label>
+          <input type="date" class="form-control" name="travel_date" required>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Passengers</label>
+          <select class="form-select" id="passengerCount" name="passenger_count">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <h5 class="fw-bold mb-3"><i class="ph ph-users text-brand"></i> Passenger Details</h5>
+    <div id="passengerForms"></div>
+
+    <div class="text-center mt-4">
+      <button type="submit" class="btn-brand btn-lg"><i class="ph ph-check-circle"></i> Confirm Booking</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/booking.js') }}"></script>
+{% endblock %}

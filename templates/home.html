@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}IntelliGate AFC - Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="container">
+    <span class="badge-pill"><i class="ph ph-scan"></i> Facial Recognition Ticketing</span>
+    <h1>Travel Smarter with<br>Face-Powered Metro Access</h1>
+    <p class="lead">Book your metro ticket online, capture your face once, and walk through the gate. No QR codes, no paper, no delays.</p>
+    <div class="d-flex gap-3 flex-wrap mt-4">
+      <a href="{{ url_for('register') }}" class="btn-brand btn-lg"><i class="ph ph-user-plus"></i> Get Started</a>
+      <a href="{{ url_for('login') }}" class="btn-brand-outline btn-lg"><i class="ph ph-sign-in"></i> Login</a>
+    </div>
+  </div>
+</section>
+
+<section class="container my-5">
+  <div class="text-center mb-5">
+    <div class="section-divider mx-auto"></div>
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-subtitle">Three simple steps from booking to boarding</p>
+  </div>
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="feature-card">
+        <div class="icon-circle icon-circle-blue"><i class="ph ph-ticket"></i></div>
+        <h5 class="fw-bold">1. Book Your Ticket</h5>
+        <p class="text-secondary small">Select your route, add passengers, and capture each face using your webcam.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="feature-card">
+        <div class="icon-circle icon-circle-teal"><i class="ph ph-video-camera"></i></div>
+        <h5 class="fw-bold">2. Walk to the Gate</h5>
+        <p class="text-secondary small">The gate camera scans your face and matches it against your booking instantly.</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="feature-card">
+        <div class="icon-circle icon-circle-green"><i class="ph ph-check-circle"></i></div>
+        <h5 class="fw-bold">3. Walk Through</h5>
+        <p class="text-secondary small">If your ticket is valid and unused, the gate opens automatically. That's it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--bg-subtle);padding:3.5rem 0;">
+  <div class="container">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-6">
+        <div class="section-divider"></div>
+        <h2 class="section-title">Why IntelliGate?</h2>
+        <p class="text-secondary">Replacing QR codes with facial recognition makes metro travel faster, more secure, and completely hands-free.</p>
+        <ul class="list-unstyled mt-4">
+          <li class="mb-3 d-flex align-items-start gap-2">
+            <i class="ph ph-check-circle text-green" style="font-size:1.3rem;margin-top:2px;"></i>
+            <span>No physical tickets or QR scans needed</span>
+          </li>
+          <li class="mb-3 d-flex align-items-start gap-2">
+            <i class="ph ph-check-circle text-green" style="font-size:1.3rem;margin-top:2px;"></i>
+            <span>One face capture links to your booking</span>
+          </li>
+          <li class="mb-3 d-flex align-items-start gap-2">
+            <i class="ph ph-check-circle text-green" style="font-size:1.3rem;margin-top:2px;"></i>
+            <span>Automatic gate control via ESP32</span>
+          </li>
+          <li class="mb-3 d-flex align-items-start gap-2">
+            <i class="ph ph-check-circle text-green" style="font-size:1.3rem;margin-top:2px;"></i>
+            <span>Ticket status tracking prevents reuse</span>
+          </li>
+        </ul>
+      </div>
+      <div class="col-lg-6 text-center">
+        <div class="feature-card" style="max-width:380px;margin:0 auto;">
+          <div class="icon-circle icon-circle-amber" style="width:72px;height:72px;font-size:2rem;"><i class="ph ph-lightning"></i></div>
+          <h4 class="fw-bold">Lightning Fast</h4>
+          <p class="text-secondary small mb-0">From face scan to gate-open in seconds. No fumbling with phones or paper.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

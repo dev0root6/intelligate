@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - IntelliGate AFC{% endblock %}
+{% block content %}
+<div class="dashboard-header">
+  <div class="container">
+    <h2><i class="ph ph-gauge"></i> Dashboard</h2>
+    <p>Welcome back, {{ current_user().full_name }}</p>
+  </div>
+</div>
+
+<div class="container mb-5">
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="stat-card d-flex align-items-center gap-3">
+        <div class="stat-icon icon-circle-blue"><i class="ph ph-ticket"></i></div>
+        <div>
+          <div class="stat-value">{{ stats.total_bookings }}</div>
+          <div class="stat-label">Total Bookings</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card d-flex align-items-center gap-3">
+        <div class="stat-icon icon-circle-green"><i class="ph ph-check-circle"></i></div>
+        <div>
+          <div class="stat-value">{{ stats.active_bookings }}</div>
+          <div class="stat-label">Active Bookings</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card d-flex align-items-center gap-3">
+        <div class="stat-icon icon-circle-teal"><i class="ph ph-users"></i></div>
+        <div>
+          <div class="stat-value">{{ stats.total_passengers }}</div>
+          <div class="stat-label">Total Passengers</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4 class="section-title mb-3">Quick Actions</h4>
+  <div class="row g-3 mb-5">
+    <div class="col-md-4 col-6">
+      <a href="{{ url_for('book_ticket') }}" class="dash-action-card">
+        <div class="action-icon icon-circle-blue"><i class="ph ph-plus-circle"></i></div>
+        <h6 class="mb-0 fw-semibold">Book Ticket</h6>
+      </a>
+    </div>
+    <div class="col-md-4 col-6">
+      <a href="{{ url_for('my_bookings') }}" class="dash-action-card">
+        <div class="action-icon icon-circle-teal"><i class="ph ph-list-dashes"></i></div>
+        <h6 class="mb-0 fw-semibold">My Bookings</h6>
+      </a>
+    </div>
+    <div class="col-md-4 col-6">
+      <a href="{{ url_for('profile') }}" class="dash-action-card">
+        <div class="action-icon icon-circle-amber"><i class="ph ph-user-circle"></i></div>
+        <h6 class="mb-0 fw-semibold">Profile</h6>
+      </a>
+    </div>
+  </div>
+
+  <h4 class="section-title mb-3">Recent Bookings</h4>
+  {% if recent %}
+    <div class="table-responsive">
+      <table class="table table-metro mb-0">
+        <thead>
+          <tr><th>Booking ID</th><th>Route</th><th>Date</th><th>Passengers</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {% for item in recent %}
+          <tr>
+            <td class="fw-semibold">{{ item.booking.booking_id }}</td>
+            <td>{{ item.booking.source }} <i class="ph ph-arrow-right text-muted"></i> {{ item.booking.destination }}</td>
+            <td>{{ item.booking.travel_date }}</td>
+            <td>{{ item.passengers|length }}</td>
+            <td><span class="status-badge status-{{ item.booking.status|lower }}">{{ item.booking.status }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="ph ph-inbox" style="font-size:3rem;"></i>
+      <p class="mt-2">No bookings yet. <a href="{{ url_for('book_ticket') }}">Book your first ticket</a>.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
