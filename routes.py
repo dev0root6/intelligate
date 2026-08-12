@@ -20,7 +20,7 @@ from services import (
     compare_faces, mark_passenger_entered,
     expire_old_bookings, cancel_booking,
     get_booking_details_for_gate, manual_authorize_gate_entry,
-    build_route_guide,
+    build_route_guide, estimate_distance_km, namma_metro_fare,
 )
 from config import Config
 
@@ -254,10 +254,48 @@ def register_routes(app):
 
         return render_template("profile.html", user=user, stats=stats)
 
+    # ------------------------------------------------------------------ plan route
+
+    @app.route("/plan-route")
+    def plan_route():
+        """Public route & fare planner — no login required."""
+        return render_template("plan_route.html", stations=STATIONS)
+
+    @app.route("/api/plan-route", methods=["POST"])
+    def plan_route_api():
+        """Public API: plan a journey and get the fare per Namma Metro pricing."""
+        data = request.get_json(silent=True) or {}
+        source = (data.get("source") or "").strip()
+        destination = (data.get("destination") or "").strip()
+        try:
+            passenger_count = int(data.get("passenger_count") or 1)
+        except (TypeError, ValueError):
+            passenger_count = 1
+        passenger_count = max(1, min(passenger_count, 5))
+
+        if not source or not destination:
+            return jsonify({"status": "Error", "message": "Please select both stations."}), 400
+        if source == destination:
+            return jsonify({"status": "Error", "message": "Source and destination cannot be the same."}), 400
+
+        guide = build_route_guide(source, destination)
+        if guide is None:
+            return jsonify({"status": "Error", "message": "No route found between these stations."}), 400
+
+        km = estimate_distance_km(source, destination)
+        fare_per_pax = namma_metro_fare(km)
+        return jsonify({
+            "status": "OK",
+            "guide": guide,
+            "distance_km": km,
+            "fare_per_pax": fare_per_pax,
+            "fare": round(fare_per_pax * passenger_count, 2),
+            "passenger_count": passenger_count,
+        })
+
     # ------------------------------------------------------------------ metro gate
 
     @app.route("/gate")
-    @login_required
     def gate():
         return render_template("gate.html")
 

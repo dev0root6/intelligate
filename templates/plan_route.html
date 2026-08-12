@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Plan Route &amp; Fare - IntelliGate AFC{% endblock %}
+{% block content %}
+<div class="container my-4">
+  <div class="section-divider"></div>
+  <h2 class="section-title"><i class="ph ph-map-trifold"></i> Plan Route &amp; Fare</h2>
+  <p class="section-subtitle">See which lines to take and your fare before booking — Namma Metro pricing</p>
+
+  <div class="card-metro p-4 mb-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label">Source Station</label>
+        <select class="form-select" id="planSource" required>
+          <option value="">Select source</option>
+          {% for s in stations %}<option>{{ s }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 d-none d-md-block text-center">
+        <i class="ph ph-arrow-right text-muted" style="font-size:1.4rem;"></i>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Destination Station</label>
+        <select class="form-select" id="planDestination" required>
+          <option value="">Select destination</option>
+          {% for s in stations %}<option>{{ s }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Passengers</label>
+        <select class="form-select" id="planCount">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+      <div class="col-12 mt-4">
+        <button type="button" class="btn-brand w-100" id="planBtn" onclick="planRoute()">
+          <i class="ph ph-map-tr"></i> Plan Route &amp; Check Fare
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="planStatus" class="gate-status-msg"></div>
+  <div id="planResult" class="mb-4"></div>
+
+  <div class="text-center my-4">
+    <a href="{{ url_for('book_ticket') }}" class="btn-brand-outline"><i class="ph ph-ticket"></i> Proceed to Booking</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+  });
+}
+var LINE_COLORS = { 'Purple': '#7b3fa0', 'Green': '#00843d', 'Yellow': '#f2b705' };
+var LINE_TEXT   = { 'Purple': '#7b3fa0', 'Green': '#00843d', 'Yellow': '#b8860b' };
+
+function planRoute() {
+  var source = document.getElementById('planSource').value;
+  var destination = document.getElementById('planDestination').value;
+  var count = parseInt(document.getElementById('planCount').value, 10);
+  var status = document.getElementById('planStatus');
+  var result = document.getElementById('planResult');
+  var btn = document.getElementById('planBtn');
+
+  if (!source || !destination) {
+    alert('Please select both stations.');
+    return;
+  }
+  if (source === destination) {
+    alert('Source and destination cannot be the same.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Planning route...';
+  status.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Calculating route &amp; fare...';
+  status.classList.add('show');
+  result.innerHTML = '';
+
+  fetch('/api/plan-route', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ source: source, destination: destination, passenger_count: count })
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ph ph-map-tr"></i> Plan Route &amp; Check Fare';
+      status.classList.remove('show');
+      status.innerHTML = '';
+      if (data.status !== 'OK') {
+        result.innerHTML = '<div class="alert alert-danger py-2 small">' + escapeHtml(data.message || 'Could not plan route.') + '</div>';
+        return;
+      }
+      result.innerHTML = renderPlanResult(data);
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ph ph-map-tr"></i> Plan Route &amp; Check Fare';
+      status.classList.remove('show');
+      status.innerHTML = '';
+      result.innerHTML = '<div class="alert alert-danger py-2 small">Connection error. Please try again.</div>';
+    });
+}
+
+function renderPlanResult(data) {
+  var g = data.guide;
+  var legs = g.legs || [];
+  var html = '';
+
+  html +=
+    '<div class="route-guide">' +
+      '<div class="d-flex align-items-center gap-2 flex-wrap mb-3">' +
+        '<span class="fw-semibold">' + escapeHtml(g.source) + '</span>' +
+        '<i class="ph ph-arrow-right text-muted"></i>' +
+        '<span class="fw-semibold">' + escapeHtml(g.destination) + '</span>' +
+        '<span class="badge fw-semibold ms-auto px-2" style="background:rgba(255,255,255,0.6);color:var(--text);">' + g.total_stops + ' stops &middot; ' + data.distance_km + ' km</span>' +
+      '</div>';
+
+  legs.forEach(function(leg, i) {
+    html +=
+      '<div class="route-leg">' +
+        '<div class="leg-head d-flex align-items-center gap-2">' +
+          '<span class="line-badge" style="background:' + (LINE_COLORS[leg.line] || 'var(--brand)') + ';color:#fff;">' + escapeHtml(leg.line) + ' Line</span>' +
+          '<span class="small text-muted">' + leg.station_count + ' stations &middot; ' + leg.stops + ' stop' + (leg.stops !== 1 ? 's' : '') + '</span>' +
+        '</div>' +
+        '<div class="leg-route small">' +
+          '<span class="fw-semibold">' + escapeHtml(leg.from) + '</span>' +
+          '<span class="track">' + 'x'.repeat(Math.min(leg.stops, 20)).split('').map(function(){ return '<span class="stop-dot"></span>'; }).join('') + '</span>' +
+          '<span class="fw-semibold">' + escapeHtml(leg.to) + '</span>' +
+        '</div>' +
+      '</div>';
+
+    if (i < legs.length - 1) {
+      var next = legs[i + 1];
+      html +=
+        '<div class="interchange d-flex align-items-center gap-2">' +
+          '<i class="ph ph-arrows-left-right text-brand"></i>' +
+          '<span class="small"><strong>Change here:</strong> ' + escapeHtml(leg.to) + ' &mdash; ' +
+            '<span class="fw-semibold" style="color:' + (LINE_TEXT[leg.line] || 'var(--text)') + ';">' + escapeHtml(leg.line) + '</span> &rarr; ' +
+            '<span class="fw-semibold" style="color:' + (LINE_TEXT[next.line] || 'var(--text)') + ';">' + escapeHtml(next.line) + '</span>' +
+          '</span>' +
+        '</div>';
+    }
+  });
+
+  // Fare summary
+  html +=
+    '<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mt-3 pt-3 report-fare" style="border-top:1px solid var(--border);">' +
+      '<div>' +
+        '<div class="text-muted small">Estimated Fare (Namma Metro pricing)</div>' +
+        '<div class="fw-bold text-amber" style="font-size:1.9rem;">&#8377;' + data.fare + '</div>' +
+      '</div>' +
+      '<div class="text-end small">' +
+        '<div class="text-muted">&#8377;' + data.fare_per_pax + ' per passenger &times; ' + data.passenger_count + ' passenger(s)</div>' +
+        '<div class="mt-1"><a href="/book-ticket" class="btn-brand btn-sm"><i class="ph ph-ticket me-1"></i> Book This Ticket</a></div>' +
+      '</div>' +
+    '</div>';
+
+  return html + '</div>';
+}
+</script>
+{% endblock %}

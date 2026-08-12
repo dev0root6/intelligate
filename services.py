@@ -92,10 +92,6 @@ for _line, _stations in STATIONS_BY_LINE.items():
 
 _ADJACENCY = {node: set(neighbors) for node, neighbors in _EDGES.items()}
 
-BASE_FARE      = 10   # ₹ per passenger (minimum fare, ~1 station)
-FARE_PER_STOP  = 2    # ₹ per additional stop per passenger
-MAX_FARE       = 90   # ₹ per passenger (Namma Metro ticket cap)
-
 
 def _stops_between(source: str, destination: str):
     """Shortest number of stops between two stations via BFS."""
@@ -188,16 +184,41 @@ def build_route_guide(source: str, destination: str):
     }
 
 
-def calculate_fare(source: str, destination: str, passenger_count: int) -> float:
-    """Return total fare (₹) for a journey.
+# Fare model per real Namma Metro (BMRCL) distance-based slabs, ₹10–₹90.
+AVG_KM_PER_STOP = 1.1  # ~average station-to-station distance across the network
 
-    Fare = min(BASE_FARE + stops × FARE_PER_STOP, MAX_FARE) × passenger_count
-    Stops are computed across the real Namma Metro network (with interchange).
-    Example: Nagasandra → Jayanagar (Green Line, 16 stops), 2 pax
-             = min(10 + 16×2, 90) × 2 = ₹42×2 = ₹84
-    """
+# (distance_km_upper_bound, fare_rs) — token fare table post Feb-2025 revision
+FARE_SLABS = [
+    (2, 10), (4, 15), (6, 20), (8, 25), (10, 30),
+    (12, 35), (14, 40), (16, 45), (20, 50), (24, 60),
+    (28, 70), (32, 80), (float("inf"), 90),
+]
+
+
+def estimate_distance_km(source: str, destination: str) -> float:
+    """Approximate journey distance (km) from the number of metro stops."""
     stops = _stops_between(source, destination) or 0
-    fare_per_pax = min(BASE_FARE + stops * FARE_PER_STOP, MAX_FARE)
+    return round(stops * AVG_KM_PER_STOP, 1)
+
+
+def namma_metro_fare(distance_km: float) -> int:
+    """BMRCL token fare (₹) for a distance in km — min ₹10, max ₹90."""
+    for upper_km, fare in FARE_SLABS:
+        if distance_km <= upper_km:
+            return fare
+    return 90
+
+
+def calculate_fare(source: str, destination: str, passenger_count: int) -> float:
+    """Return total fare (₹) for a journey using real Namma Metro pricing.
+
+    Fare = namma_metro_fare(estimated_km) × passenger_count
+    Stops are routed across the real network (with interchanges).
+    Example: Nagasandra → Jayanagar (Green Line), 2 pax
+             ≈ 16 stops × 1.1 km ≈ 17.6 km → ₹45/pax × 2 = ₹90
+    """
+    km = estimate_distance_km(source, destination)
+    fare_per_pax = namma_metro_fare(km)
     return round(fare_per_pax * passenger_count, 2)
 
 
